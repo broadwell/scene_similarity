@@ -1,7 +1,8 @@
 # Usage: video_split.sh video.mp4
 
 # Get the video name without the file extension for later use.
-videobasename=${1%.*}
+filebasename=${1##*/}
+videobasename=${filebasename%.*}
 
 # Make directories to hold images and metadata
 mkdir -p scenes
