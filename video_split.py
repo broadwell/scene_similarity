@@ -34,3 +34,22 @@ for video in videos[0:3]:
 	# Call ffprobe
 	subprocess.call(ffprobe_gettimestamps, shell=True)
 
+	# SECTION BELOW: This should really be ported to python...
+
+	# Get a list of each keyframe image
+	bash_makekeyframelist = 'ls -1 scenes/' + video_basename + '/' + video_basename + '~*.jpg | xargs -n 1 basename > metadata/' + video_basename + '_keyframe_thumbnails.txt'
+	subprocess.call(bash_makekeyframelist, shell=True)
+
+	# Glue the image list together with each timestamp
+	bash_paste = 'paste metadata/' + video_basename + '_keyframe_thumbnails.txt metadata/' + video_basename + '_keyframe_timestamps.txt > metadata/' + video_basename + '_keyframes.txt'
+	subprocess.call(bash_paste, shell=True)
+
+	# Rename the keyframe image with its timestamp
+	bash_timestamprename = 'while read -r thumbnail index; do newIndex=$(echo $index - 1 | bc); mv -- "scenes/' + video_basename + '/${thumbnail}" "scenes/' + video_basename + '/' + video_basename + '~${newIndex}.jpg"; done < metadata/' + video_basename + '_keyframes.txt'
+	subprocess.call(bash_timestamprename, shell=True)
+
+	# Edge case where the first frame gets assigned to negative one seconds. Fix by renaming to zero.
+	bash_fixnegativetime = 'mv "scenes/' + video_basename + '/' + video_basename + '~-1.jpg"  "scenes/' + video_basename + '/' + video_basename + '~0.jpg"'
+	subprocess.call(bash_fixnegativetime, shell=True)
+
+
