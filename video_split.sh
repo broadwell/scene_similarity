@@ -13,7 +13,7 @@ mkdir -p metadata
 # to separate GUID from frame number.
 # Use up to four digits for frame namespace in case # of scenes is high.
 
-ffmpeg -i $1  -vf "select=eq(pict_type\,I)" -vsync vfr -q:v 2 scenes/${videobasename}/${videobasename}~%04d.jpg
+ffmpeg -i $1  -vf "select=eq(pict_type\,I)" -vsync vfr -q:v 2 scenes/${videobasename}/${videobasename}~%04d.jpg  </dev/null
 # Get the keyframe numbers
 #ffprobe -select_streams v -show_frames -show_entries frame=pict_type -of csv $1 | grep -n I | cut -d ':' -f 1 > metadata/${videobasename}_keyframe_indices.txt
 # Get the timestamp in seconds
