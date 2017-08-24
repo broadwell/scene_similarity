@@ -2,11 +2,28 @@ from glob import glob
 import sys
 import os
 import subprocess
+import Image
+import math
+
+def shannon_entropy(img):
+
+	# calculate the shannon entropy for an image
+
+	histogram = img.histogram()
+	histogram_length = sum(histogram)
+
+	samples_probability = [float(h) / histogram_length for h in histogram]
+
+	return -sum([p * math.log(p, 2) for p in samples_probability if p != 0])
+
+
 
 if not os.path.exists('scenes'):
     os.makedirs('scenes')
 if not os.path.exists('metadata'):
     os.makedirs('metadata')
+if not os.path.exists('quarantine'):
+	os.makedirs('quarantine')
 
 
 video_dir = str(sys.argv[1])
@@ -51,5 +68,16 @@ for video in videos[0:3]:
 	# Edge case where the first frame gets assigned to negative one seconds. Fix by renaming to zero.
 	bash_fixnegativetime = 'mv "scenes/' + video_basename + '/' + video_basename + '~-1.jpg"  "scenes/' + video_basename + '/' + video_basename + '~0.jpg"'
 	subprocess.call(bash_fixnegativetime, shell=True)
+
+	for thumbnail in glob('scenes/' + video_basename + '/*.jpg'):
+		imgforentropy = Image.open(thumbnail)
+		entropy_result = shannon_entropy(imgforentropy)
+		if entropy_result <= 2:
+			if not os.path.exists('quarantine/' + video_basename):
+				os.makedirs('quarantine/'  + video_basename)
+			print thumbnail + ' seems to be pretty low energy! (' +  str(entropy_result) + ' to be precise.) Quarantining...'
+			thumbnail_basename = os.path.splitext(os.path.basename(thumbnail))[0]
+			os.rename(thumbnail, "quarantine/" + video_basename + '/' + thumbnail_basename + '.jpg')
+
 
 
