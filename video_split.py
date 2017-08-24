@@ -32,7 +32,7 @@ print "Processing videos in " + video_dir + "..."
 videos = glob(video_dir + '/*.mp4')
 videos.extend(glob(video_dir + '/*.mkv'))
 videos.extend(glob(video_dir + '/*.webm'))
-for video in videos[0:3]:
+for video in videos[0:10]:
 	# Get the basename of the video
 	video_basename = os.path.splitext(os.path.basename(video))[0]
 	print "Now analyzing " + video
@@ -69,15 +69,22 @@ for video in videos[0:3]:
 	bash_fixnegativetime = 'mv "scenes/' + video_basename + '/' + video_basename + '~-1.jpg"  "scenes/' + video_basename + '/' + video_basename + '~0.jpg"'
 	subprocess.call(bash_fixnegativetime, shell=True)
 
+	# Post-facto image processing of thumbnails
+
+	# Test for low-energy images. Sad!
 	for thumbnail in glob('scenes/' + video_basename + '/*.jpg'):
-		imgforentropy = Image.open(thumbnail)
-		entropy_result = shannon_entropy(imgforentropy)
+		image = Image.open(thumbnail)
+		entropy_result = shannon_entropy(image)
 		if entropy_result <= 2:
 			if not os.path.exists('quarantine/' + video_basename):
 				os.makedirs('quarantine/'  + video_basename)
-			print thumbnail + ' seems to be pretty low energy! (' +  str(entropy_result) + ' to be precise.) Quarantining...'
+			print thumbnail + ' is low energy: ' +  str(entropy_result) + ' to be precise. Sad! Quarantining...'
 			thumbnail_basename = os.path.splitext(os.path.basename(thumbnail))[0]
 			os.rename(thumbnail, "quarantine/" + video_basename + '/' + thumbnail_basename + '.jpg')
+	# Remove baked-in letterboxes
+	imagemagick_letterboxcrop = 'find "scenes/' + video_basename + '" -iname "*.jpg" | parallel --no-notice convert {} -gravity South -background white -splice 0x5 -background black -splice 0x5 -fuzz 5% -trim +repage -chop 0x5 -gravity North -background white -splice 0x5 -background black -splice 0x5 -fuzz 5% -trim +repage -chop 0x5 -shave 1x1 {}'
+	print 'Now executing ' + imagemagick_letterboxcrop
+	subprocess.call(imagemagick_letterboxcrop, shell=True)
 
 
 
