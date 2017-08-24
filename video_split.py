@@ -70,13 +70,14 @@ for video in videos:
 	subprocess.call(bash_fixnegativetime, shell=True)
 
 	# Post-facto image processing of thumbnails
-
-
-	
-	# Test for low-energy images. Sad!
+	# Keep track of how many were removed for what reason.
 	thumbnailcount = 0
 	thumbnailremovedentropycount = 0
 	thumbnailremovedcropcount = 0
+
+	
+	# Test for low-energy images. Sad!
+
 	for thumbnail in glob('scenes/' + video_basename + '/*.jpg'):
 		thumbnailcount += 1
 		image = Image.open(thumbnail)
