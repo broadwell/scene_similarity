@@ -107,7 +107,10 @@ for video in videos:
 		image_size = os.path.getsize(croppedthumbnail)
 		if image_size < 1000:
 			print thumbnail_basename + ' was clobbered by de-letterboxing; quarantining...'
-			os.rename('scenes/' + video_basename + '/' + croppedthumbnail_basename + '.jpg', "quarantine/" + video_basename + '/' + croppedthumbnail_basename + '.jpg')
+			try:
+				os.rename('scenes/' + video_basename + '/' + croppedthumbnail_basename + '.jpg', 'quarantine/' + video_basename + '/' + croppedthumbnail_basename + '.jpg')
+			except:
+				print 'Failed to move scenes/' + video_basename + '/' + croppedthumbnail_basename + '.jpg to quarantine/' + video_basename + '/' + croppedthumbnail_basename + '.jpg'
 			os.remove(croppedthumbnail)
 			thumbnailremovedcropcount += 1
 		else:
